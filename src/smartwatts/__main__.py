@@ -65,7 +65,8 @@ def generate_smartwatts_parser() -> CommonCLIParsingManager:
     pm.add_argument('disable-dram-formula', help_text='Disable DRAM formula', is_flag=True, argument_type=bool, default_value=False, action=store_true)
 
     # Formula RAPL reference event
-    pm.add_argument('cpu-rapl-ref-event', help_text='RAPL event used as reference for the CPU power models', default_value='RAPL_ENERGY_PKG')
+    pm.add_argument('cpu-rapl-ref-cpu-event', help_text='RAPL event used as reference for the CPU power models', default_value='XGENE_ENERGY_CPU')
+    pm.add_argument('cpu-rapl-ref-io-event', help_text='RAPL event used as reference for the CPU power models', default_value='XGENE_ENERGY_IO')
     pm.add_argument('dram-rapl-ref-event', help_text='RAPL event used as reference for the DRAM power models', default_value='RAPL_ENERGY_DRAM')
 
     # CPU topology information
@@ -94,14 +95,15 @@ def generate_formula_configuration(config: Dict, cpu_topology: CPUTopology, scop
     Generate a SmartWatts actor configuration.
     """
     reports_freq = config['sensor-reports-frequency']
-    rapl_event = config[f'{scope.value}-rapl-ref-event']
+    rapl_cpu_event = config[f'{scope.value}-rapl-ref-cpu-event']
+    rapl_io_event = config[f'{scope.value}-rapl-ref-io-event']
     error_threshold = config[f'{scope.value}-error-threshold']
     min_samples = config['learn-min-samples-required']
     history_window_size = config['learn-history-window-size']
     real_time_mode = config['stream']
     error_window_size = config['learn-error-window-size']
     error_window_method = config['learn-error-window-method']
-    return SmartWattsFormulaConfig(scope, reports_freq, rapl_event, error_threshold, cpu_topology, min_samples, history_window_size, real_time_mode, error_window_size, error_window_method)
+    return SmartWattsFormulaConfig(scope, reports_freq, rapl_cpu_event, rapl_io_event, error_threshold, cpu_topology, min_samples, history_window_size, real_time_mode, error_window_size, error_window_method)
 
 
 def setup_cpu_formula_dispatcher(config, route_table, report_filter, cpu_topology, pushers) -> DispatcherActor:
@@ -159,7 +161,7 @@ def run_smartwatts(config) -> None:
 
     logging.info('CPU formula is %s', 'DISABLED' if config['disable-cpu-formula'] else 'ENABLED')
     if not config['disable-cpu-formula']:
-        logging.info('CPU formula parameters: RAPL_REF=%s ERROR_THRESHOLD=%sW', config['cpu-rapl-ref-event'], config['cpu-error-threshold'])
+        #logging.info('CPU formula parameters: RAPL_REF=%s ERROR_THRESHOLD=%sW', config['cpu-rapl-ref-event'], config['cpu-error-threshold'])
         dispatchers['cpu'] = setup_cpu_formula_dispatcher(config, route_table, report_filter, cpu_topology, pushers)
 
     logging.info('DRAM formula is %s', 'DISABLED' if config['disable-dram-formula'] else 'ENABLED')

@@ -76,7 +76,7 @@ class HwPCReportHandler(Handler):
         :param system_msr: MSR events group of System target
         :return: Average frequency (in MHz) of the Package
         """
-        return int((self.state.config.cpu_topology.get_base_frequency() * system_msr['APERF']) / system_msr['MPERF'])
+        return int((self.state.config.cpu_topology.get_base_frequency() * system_msr['CPPC_DEL']) / system_msr['CPPC_REF'])
 
     def handle(self, msg: HWPCReport) -> None:
         """
@@ -115,8 +115,8 @@ class HwPCReportHandler(Handler):
         rapl = self._gen_rapl_events_group(global_report)
         avg_msr = self._gen_msr_events_group(global_report)
         global_core = self._gen_agg_core_report_from_running_targets(hwpc_reports)
-        rapl_power = rapl[self.state.config.rapl_event]
-        power_reports.append(self._gen_power_report(timestamp, 'rapl', self.state.config.rapl_event, rapl_power, 1.0, global_report.metadata))
+        rapl_power = rapl[self.state.config.rapl_cpu_event]
+        power_reports.append(self._gen_power_report(timestamp, 'rapl', self.state.config.rapl_cpu_event, rapl_power, 1.0, global_report.metadata))
 
         try:
             pkg_frequency = self._compute_avg_pkg_frequency(avg_msr)
@@ -201,8 +201,8 @@ class HwPCReportHandler(Handler):
         :return: A dictionary containing the RAPL reference event with its value converted in Watts
         """
         cpu_events = next(iter(system_report.groups['rapl'][str(self.state.socket)].values()))
-        energy = ldexp(cpu_events[self.state.config.rapl_event], -32) / (self.state.config.reports_frequency / 1000)
-        return {self.state.config.rapl_event: energy}
+        energy = (cpu_events[self.state.config.rapl_cpu_event] + cpu_events[self.state.config.rapl_io_event]) / 1000000
+        return {self.state.config.rapl_cpu_event: energy}
 
     def _gen_msr_events_group(self, system_report) -> Dict[str, float]:
         """
