@@ -212,7 +212,7 @@ if __name__ == "__main__":
         logging.error('File does not exist: %s', exn)
         sys.exit(1)
 
-    LOGGING_LEVEL = logging.DEBUG if args['verbose'] else logging.INFO
+    LOGGING_LEVEL = logging.INFO
     LOGGING_FORMAT = '%(asctime)s - %(process)d - %(processName)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(level=LOGGING_LEVEL, format=LOGGING_FORMAT)
 
