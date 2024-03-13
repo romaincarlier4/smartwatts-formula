@@ -65,7 +65,7 @@ class PowerModel:
         if len(samples_history) < self.min_samples:
             return
 
-        fit_intercept = len(samples_history) == samples_history.max_length
+        fit_intercept = False
         model = ElasticNet(fit_intercept=fit_intercept, positive=True)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")

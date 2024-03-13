@@ -1,4 +1,4 @@
-FROM romaincarlier4/powerapi:arm64
+FROM romaincarlier4/powerapi-ampere
 
 USER powerapi
 COPY --chown=powerapi . /tmp/smartwatts
